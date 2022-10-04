@@ -1,6 +1,7 @@
 import sys
 from Adafruit_IO import MQTTClient
-from simple_ai import *
+from physical import ActuatorController
+# from simple_ai import *
 import time
 
 AIO_FEED_ID = ["actuator1", "actuator2"]
@@ -21,7 +22,17 @@ def disconnected(client):
     sys.exit(1)
 
 def message(client, feed_id, payload):
+
     print("Nhan du lieu " + feed_id + ":" + payload)
+    state = True if payload=="1"  else False
+    if feed_id == "actuator1":
+        controller.switch_actuator_1(state)
+    elif feed_id == "actuator2":
+        controller.switch_actuator_2(state)
+    else:
+        print("TODO!")
+
+controller = ActuatorController()
 
 client = MQTTClient(AIO_USERNAME, AIO_KEY)
 client.on_connect = connected
@@ -33,6 +44,6 @@ client.loop_background()
 
 while True:
     time.sleep(5)
-    image_capture()
-    ai_result = image_detector()
-    client.publish("visiondetection", ai_result)
+    # image_capture()
+    # ai_result = image_detector()
+    # client.publish("visiondetection", ai_result)
