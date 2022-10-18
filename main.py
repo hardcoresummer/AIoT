@@ -43,7 +43,8 @@ client.connect()
 client.loop_background()
 
 while True:
-    print("temperature:",controller.readTemperature()/100)
+    client.publish("sensor1", controller.readTemperature()/100)
+    client.publish("sensor2", controller.readMoisture()/100)
     time.sleep(0.1)
     # image_capture()
     # ai_result = image_detector()
