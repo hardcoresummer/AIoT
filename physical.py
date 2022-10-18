@@ -22,7 +22,7 @@ class ActuatorController():
 
         which_os = platform.system()
         print(which_os)
-        if which_os == "linux":
+        if which_os == "Linux":
             portName = "/dev/"+ port_list[0].name
         else:
             portName="None"
@@ -48,6 +48,32 @@ class ActuatorController():
     
     def close(self):
         self.ser.close()
+
+    def serial_read_data(self):
+        ser = self.ser
+        bytesToRead = ser.inWaiting()
+        if bytesToRead > 0:
+            out = ser.read(bytesToRead)
+            data_array = [b for b in out]
+            print(data_array)
+            if len(data_array) >= 7:
+                array_size = len(data_array)
+                value = data_array[array_size - 4] * 256 + data_array[array_size - 3]
+                return value
+            else:
+                return -1
+        return 0
+    def readTemperature(self):
+        soil_temperature =[1, 3, 0, 6, 0, 1, 100, 11]
+        self.serial_read_data()
+        self.ser.write(soil_temperature)
+        time.sleep(1)
+        return self.serial_read_data()
+
+
+
+
+
 
 if __name__ == "__main__":
     pass
