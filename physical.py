@@ -14,16 +14,16 @@ RELAY1_OFF = [0,6,0,0,0,0,136,27]
 RELAY2_ON = [15,6,0,0,0,255,200,91]
 RELAY2_OFF = [15,6,0,0,0,0,136,27]
 
-class ActuatorController():
+class ModbusMaster():
     def __init__(self) -> None:
         port_list=  list_ports.comports()
         if len(port_list)==0:
             raise Exception("No port found!")
 
         which_os = platform.system()
-        print(which_os)
         if which_os == "Linux":
-            portName = "/dev/"+ port_list[0].name
+            name_ports = filter(lambda name: "USB" in name,map(lambda port: port.name,port_list))
+            portName = "/dev/"+ name_ports[0]
         else:
             portName="None"
             for port in port_list:
@@ -31,8 +31,13 @@ class ActuatorController():
                 if "USB Serial" in strPort:
                     splitPort = strPort.split(" ")
                     portName = (splitPort[0])
-
         self.ser = serial.Serial(portName)
+
+    def __enter__(self):
+        return self
+    def __exit__(self):
+        print("closing the serial connection")
+        self.close()
 
     def switch_actuator_1(self,state):
         if state == True:
@@ -77,9 +82,5 @@ class ActuatorController():
 
 if __name__ == "__main__":
     pass
-    # while True:
-    #     ser.write(RELAY1_ON)
-    #     time.sleep(2)
-    #     ser.write(RELAY1_OFF)
-    #     time.sleep(10)
+
 

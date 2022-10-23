@@ -1,49 +1,38 @@
 print("Simple AI")
-from keras.models import load_model
+import threading
 from PIL import Image, ImageOps
 import numpy as np
 import cv2
-cam = cv2.VideoCapture(0)
+import torch
+import clip
 
-# Load the model
-model = load_model('keras_model.h5')
+class PlantHealthDetection():
+    def __init__(self) -> None:
 
-# Capture image from webcam
-def image_capture():
-    ret, frame = cam.read()
-    cv2.imwrite("test.png", frame)
+        # start a thread to continuously read and discard the buffer
+        self.cap = cv2.VideoCapture(0)
+        self.remove_buffer_thread = threading.Thread(target=self._grab_frame)
+        self.remove_buffer_thread.daemon = True
+        self.remove_buffer_thread.start()
 
-def image_detector():
-    # Create the array of the right shape to feed into the keras model
-    # The 'length' or number of images you can put into the array is
-    # determined by the first position in the shape tuple, in this case 1.
-    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-    # Replace this with the path to your image
-    image = Image.open('test.png')
-    #resize the image to a 224x224 with the same strategy as in TM2:
-    #resizing the image to be at least 224x224 and then cropping from the center
-    size = (224, 224)
-    image = ImageOps.fit(image, size, Image.ANTIALIAS)
+        
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model, self.preprocess = clip.load("ViT-L/14", device=self.device)
+        self.labels = ["healthy plant", "diseased plant","withered plant","other"]
+        self.tokenized_labels = clip.tokenize(["healthy plant", "diseased plant","withered plant","other"]).to(self.device)
+    
+    def get_plant_condition(self):
+        with torch.no_grad():
+            _,frame = self.cap.retrieve()
+            image = self.preprocess(Image.fromarray(frame,mode="BGR")).unsqueeze(0).to(self.device)
+            logits_per_image, logits_per_text = self.model(image, self.tokenized_labels)
+            probs = logits_per_image.softmax(dim=-1).cpu().numpy()
+            ind = np.argmax(probs)
+            return self.labels[ind],frame
+    def _grab_frame(self):
+        while True:
+            ret = self.cap.grab()
+            if not ret:
+                break
 
-    #turn the image into a numpy array
-    image_array = np.asarray(image)
-    # Normalize the image
-    normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
-    # Load the image into the array
-    data[0] = normalized_image_array
-
-    # run the inference
-    prediction = model.predict(data)
-    print(prediction)
-    max_index = 0
-    max_confidence = prediction[0]
-    for i in range(1, len(prediction)):
-        if max_confidence < prediction[i]:
-            max_confidence = prediction[i]
-            max_index = i
-    print(max_index, max_confidence)
-    file = open("label.txt", encoding="utf8")
-    data = file.read().split("\n")
-    print("AI Result: ", data[max_index])
-    return data[max_index]
 
