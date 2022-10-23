@@ -74,6 +74,12 @@ class ModbusMaster():
         self.ser.write(soil_temperature)
         time.sleep(1)
         return self.serial_read_data()
+    def readMoisture(self):
+        soil_moisture = [1, 3, 0, 7, 0, 1, 53, 203]
+        self.serial_read_data()
+        self.ser.write(soil_moisture)
+        time.sleep(1)
+        return self.serial_read_data()
 
 
 
