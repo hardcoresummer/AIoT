@@ -1,6 +1,7 @@
 import sys
 from Adafruit_IO import MQTTClient
 from simple_ai import *
+from physical import *
 import time
 
 AIO_FEED_ID = ["actuator1", "actuator2"]
@@ -33,6 +34,10 @@ client.loop_background()
 
 while True:
     time.sleep(5)
-    image_capture()
-    ai_result = image_detector()
-    client.publish("visiondetection", ai_result)
+    # image_capture()
+    # ai_result = image_detector()
+    # client.publish("visiondetection", ai_result)
+    temperature = readTemperature()
+    client.publish("sensor1", temperature)
+    moisture = readMoisture()
+    client.publish("sensor2", moisture)
