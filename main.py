@@ -5,6 +5,7 @@ from physical import *
 import time
 
 AIO_FEED_ID = ["actuator1", "actuator2", "sensor1", "sensor2"]
+AIO_FEED_ID = ["actuator1", "actuator2"]
 AIO_USERNAME = ""
 AIO_KEY = ""
 
