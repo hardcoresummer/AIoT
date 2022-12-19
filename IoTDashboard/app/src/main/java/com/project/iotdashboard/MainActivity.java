@@ -1,19 +1,25 @@
 package com.project.iotdashboard;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.CompoundButton;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -25,173 +31,56 @@ import org.json.JSONObject;
 import java.nio.charset.Charset;
 
 public class MainActivity extends AppCompatActivity {
-    MQTTHelper mqttHelper;
-    TextView txtTemp, txtHumi;
-    ToggleButton btnPump, btnFan;
-
+    private BottomNavigationView bottomNavigationView;
+//    private NavHostFragment navHostFragment;
+    private static final String tag1 = "tag1";
+    private static final String tag2 = "tag2";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startMQTT();
+
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        NavController navController = navHostFragment.getNavController();
 
 
-
-        txtTemp = findViewById(R.id.txtTemperature);
-        txtHumi = findViewById(R.id.txtHmidity);
-        btnPump = findViewById(R.id.btnPUMP);
-        btnFan = findViewById(R.id.btnFAN);
-        parseApiData();
-        btnPump.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                sendDataMQTT("thaotran/feeds/actuator1", "1");
-            }
-            else {
-                sendDataMQTT("thaotran/feeds/actuator1", "0");
-            }
-        });
-
-        btnFan.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                sendDataMQTT("thaotran/feeds/actuator2", "1");
-            }
-            else {
-                sendDataMQTT("thaotran/feeds/actuator2", "0");
-            }
-        });
-    }
-
-    public void sendDataMQTT(String topic, String value){
-        MqttMessage msg = new MqttMessage();
-        msg.setId(1234);
-        msg.setQos(0);
-        msg.setRetained(false);
-
-        byte[] b = value.getBytes(Charset.forName("UTF-8"));
-        msg.setPayload(b);
-
-        try {
-            mqttHelper.mqttAndroidClient.publish(topic, msg);
-        }catch (MqttException e){
-
-        }
-
-    }
-
-    public void parseApiData() {
-        StringRequest stringRequestForActuator1 = new StringRequest(Request.Method.GET, "https://io.adafruit.com/api/v2/thaotran/feeds/actuator1", response -> {
-            Log.e("Res: ", response);
-            try {
-                JSONObject obj = new JSONObject(response);
-                String lastValue = obj.getString("last_value");
-                if (lastValue.equals("1"))
-                    btnPump.setChecked(true);
-                else
-                    btnPump.setChecked(false);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }, error -> {
-
-        });
-
-        StringRequest stringRequestForActuator2 = new StringRequest(Request.Method.GET, "https://io.adafruit.com/api/v2/thaotran/feeds/actuator2", response -> {
-            Log.e("Res: ", response);
-            try {
-                JSONObject obj = new JSONObject(response);
-                String lastValue = obj.getString("last_value");
-                if (lastValue.equals("1"))
-                    btnFan.setChecked(true);
-                else
-                    btnFan.setChecked(false);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }, error -> {
-
-        });
-
-        StringRequest stringRequestForSensor1 = new StringRequest(Request.Method.GET, "https://io.adafruit.com/api/v2/thaotran/feeds/sensor1", response -> {
-            Log.e("Res: ", response);
-            try {
-                JSONObject obj = new JSONObject(response);
-                String lastValue = obj.getString("last_value");
-                txtTemp.setText(lastValue);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }, error -> {
-
-        });
-
-        StringRequest stringRequestForSensor2 = new StringRequest(Request.Method.GET, "https://io.adafruit.com/api/v2/thaotran/feeds/sensor2", response -> {
-            Log.e("Res: ", response);
-            try {
-                JSONObject obj = new JSONObject(response);
-                String lastValue = obj.getString("last_value");
-                txtHumi.setText(lastValue);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }, error -> {
-
-        });
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequestForActuator1);
-        requestQueue.add(stringRequestForActuator2);
-        requestQueue.add(stringRequestForSensor1);
-        requestQueue.add(stringRequestForSensor2);
-    }
-    public void startMQTT() {
-        mqttHelper = new MQTTHelper(this);
-                //Lambda instruction or Asynchronous instruction
-
-
-        mqttHelper.setCallback(new MqttCallbackExtended() {
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                Log.d("TEST", topic + " *** " + message.toString());
-                if (topic.contains("sensor1")) {
-                    txtTemp.setText(message.toString());
+            public boolean onNavigationItemSelected(MenuItem item) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                String chosen_tag = null;
+                Fragment fragment = null;
+                NavDirections action = null;
+                switch (item.getItemId()) {
+                    case R.id.menu_sensor:
+//                        action = SensorFragmentDirections.actionSensorFragmentSelf();
+                        action = PlantHealthFragmentDirections.actionPlantHealthFragmentToSensorFragment();
+                        navController.navigate(action);
+//                        fragment = fragmentManager.findFragmentByTag(tag1);
+//                        if(fragment == null){
+//                            Log.i("frag","creating frag");
+//                            fragment = new SensorFragment();
+//                        }
+//                        chosen_tag = tag1;
+                        break;
+                    case R.id.menu_plant_health:
+                        action = SensorFragmentDirections.actionSensorFragmentToPlantHealthFragment();
+                        navController.navigate(action);
+//                        fragment = fragmentManager.findFragmentByTag(tag2);
+//                        if(fragment == null){
+//                            fragment = new PlantHealthFragment();
+//                        }
+//                        chosen_tag = tag2;
+                        break;
                 }
-                else if (topic.contains("sensor2")) {
-                    txtHumi.setText(message.toString());
-                }
-                else if (topic.contains("actuator1")) {
-                    if(message.toString().equals("1")) {
-                        btnPump.setChecked(true);
-                    }
-                    else
-                        btnPump.setChecked(false);
-                }
-                else if (topic.contains("actuator2")) {
-                    if(message.toString().equals("1")) {
-                        btnFan.setChecked(true);
-                    }
-                    else
-                        btnFan.setChecked(false);
-                }
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
+//                getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, fragment,chosen_tag).commit();
+                return true;
             }
         });
+
+        // Set default selection
+        bottomNavigationView.setSelectedItemId(R.id.menu_sensor);
     }
 }
