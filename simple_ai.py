@@ -24,7 +24,8 @@ class PlantHealthDetection():
     def get_plant_condition(self):
         with torch.no_grad():
             _,frame = self.cap.retrieve()
-            image = self.preprocess(Image.fromarray(frame,mode="BGR")).unsqueeze(0).to(self.device)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = self.preprocess(Image.fromarray(frame,mode="RGB")).unsqueeze(0).to(self.device)
             logits_per_image, logits_per_text = self.model(image, self.tokenized_labels)
             probs = logits_per_image.softmax(dim=-1).cpu().numpy()
             ind = np.argmax(probs)

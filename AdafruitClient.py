@@ -9,15 +9,16 @@ class AdafruitClient(BaseComponent):
         def connected(client):
             print("Ket noi thanh cong...")
             for topic in subscribe_topics:
-                client.subscribe(subscribe_topics)
+                client.subscribe(topic)
 
         def subscribe(client, userdata, mid, granted_qos):
-            print("Subscribe thanh cong...")
+            print("Subscribe thanh cong...",userdata,mid,granted_qos,client)
 
         def disconnected(client):
             print("Ngat ket noi...")
             sys.exit(1)
         def message(client, feed_id, payload):
+            # print("Nhan du lieu " + feed_id + ":" + payload)
             self.mediator.notify(self,(feed_id,payload))
     
         client.on_connect = connected

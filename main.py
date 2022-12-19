@@ -44,7 +44,6 @@ class StateController(Mediator):
 
     def _handle_server_message_event(self,event_data):
         feed_id,payload = event_data
-        print("Nhan du lieu " + feed_id + ":" + payload)
         state = True if payload=="1"  else False
         if feed_id == "actuator1":
             self.serial_connector.switch_actuator_1(state)
@@ -53,11 +52,12 @@ class StateController(Mediator):
         else:
             print("TODO!")
     def _handle_temperature_event(self,event_data):
-        self.ada_client.client.publish("sensor0",self.serial_connector.readTemperature()/100)
+        self.ada_client.client.publish("sensor0",self.serial_connector.readTemperature()/10)
     def _handle_moisture_event(self,event_data):
-        self.ada_client.client.publish("sensor1",self.serial_connector.readMoisture()/100)
+        self.ada_client.client.publish("sensor1",self.serial_connector.readMoisture()/10)
     def _handle_plant_health_event(self,event_data):
         label,image = event_data
+
         # convert image from numpy array to compressed stream
         optim_stream = io.BytesIO()
         Image.fromarray(image).save(optim_stream,format="JPEG",optimize=True,quality=60)
@@ -77,15 +77,21 @@ class StateController(Mediator):
 # wait on input from ada.io to activate pump controller   (how to add desired behaviour in on_message func)
 # check image to see if plant is rotten or not, send status to ada.io
 
-AIO_USERNAME=""
-AIO_KEY=""
+AIO_USERNAME="thaotran"
+AIO_KEY="aio_bYia38QrXpYz5klG3ZLrnj7p0tqb"
 
 if __name__ == '__main__':
+
+    #component for connecting edge device to adafruit.io
     modbus_master = ModbusMaster()
-    tempReader = TempReader(period=30)
-    moistureReader = MoistureReader(period=60)
+    adafruit_client = AdafruitClient(AIO_USERNAME,AIO_KEY,["sensor0","sensor1","actuator1","actuator2"])
+
+    #sensors
+    tempReader = TempReader(period=4)
+    moistureReader = MoistureReader(period=4)
     plantHealthDetector = PlantHealthReader(period=300)
-    adafruit_client = AdafruitClient(AIO_USERNAME,AIO_KEY,["sensor0","sensor1"])
+
+
     stateController = StateController(adafruit_client,modbus_master,tempReader,moistureReader,plantHealthDetector)
     
     # cant think of a better way to stop the main thread
