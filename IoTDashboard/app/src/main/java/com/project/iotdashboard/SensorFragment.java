@@ -2,6 +2,7 @@ package com.project.iotdashboard;
 
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -34,7 +35,7 @@ public class SensorFragment extends Fragment {
 
 
     TextView txtTemp, txtHumi;
-    ToggleButton btnPump, btnFan;
+    SwitchCompat btnPump, btnFan;
     private MQTTHelper mqttHelper;
     public SensorFragment() {
         // Required empty public constructor

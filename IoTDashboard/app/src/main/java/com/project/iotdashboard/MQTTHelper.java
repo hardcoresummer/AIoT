@@ -25,8 +25,8 @@ public class MQTTHelper {
 
     final String clientId = "12312122";
     final String serverUri = "tcp://io.adafruit.com:1883";
-    final String username = "username";
-    final String password = "password";
+    final String username = "thaotran";
+    final String password = "aio_OyIH1218DI45fuC2e6xAF5NLxA7v";
 
     public MQTTHelper(Context context,String[] topics) {
         arrayTopics = topics;
