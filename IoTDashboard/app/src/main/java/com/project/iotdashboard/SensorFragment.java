@@ -68,6 +68,8 @@ public class SensorFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
 //        seem like the lifecycle of Fragment is not long enough it must use the outer activity
         model = new ViewModelProvider(getActivity()).get(SensorViewModel.class);
 
@@ -81,8 +83,14 @@ public class SensorFragment extends Fragment {
         model.getTempData().observe(this, data->{
             Log.d("APP","data is"+data.toString());
             txtTemp.setText(data);
+            txtTemp.setVisibility(View.VISIBLE);
+            container_temp.stopShimmer();
+            container_temp.setVisibility(View.GONE);
         });
         model.getHumidData().observe(this, data->{
+            txtHumi.setVisibility(View.VISIBLE);
+            container_humid.stopShimmer();
+            container_humid.setVisibility(View.GONE);
             txtHumi.setText(data);
         });
 
@@ -94,6 +102,8 @@ public class SensorFragment extends Fragment {
         txtHumi = view.findViewById(R.id.txtHumidity);
         btnPump = view.findViewById(R.id.btnPUMP);
         btnFan = view.findViewById(R.id.btnFAN);
+        container_temp = view.findViewById(R.id.shimmer_temp);
+        container_humid = view.findViewById(R.id.shimmer_humid);
         btnPump.setOnCheckedChangeListener((compoundButton, b) -> {
             model.setPumpOn(b);
         });
