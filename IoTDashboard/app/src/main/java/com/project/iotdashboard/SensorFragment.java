@@ -3,6 +3,9 @@ package com.project.iotdashboard;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.shimmer.ShimmerFrameLayout;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -35,7 +39,12 @@ public class SensorFragment extends Fragment {
 
     TextView txtTemp, txtHumi;
     ToggleButton btnPump, btnFan;
-    private MQTTHelper mqttHelper;
+    ShimmerFrameLayout container_temp ;
+
+    ShimmerFrameLayout container_humid ;
+
+
+    SensorViewModel model;
     public SensorFragment() {
         // Required empty public constructor
     }
@@ -59,42 +68,24 @@ public class SensorFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mqttHelper = new MQTTHelper(this.getContext(), new String[]{"thaotran/feeds/sensor1", "thaotran/feeds/sensor2", "thaotran/feeds/actuator1", "thaotran/feeds/actuator2"});
-        //Lambda instruction or Asynchronous instruction
-        mqttHelper.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean reconnect, String serverURI) {}
+//        seem like the lifecycle of Fragment is not long enough it must use the outer activity
+        model = new ViewModelProvider(getActivity()).get(SensorViewModel.class);
 
-            @Override
-            public void connectionLost(Throwable cause) {}
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                Log.d("TEST", topic + " *** " + message.toString());
-                if (topic.contains("sensor1")) {
-                    txtTemp.setText(message.toString());
-                }
-                else if (topic.contains("sensor2")) {
-                    txtHumi.setText(message.toString());
-                }
-                else if (topic.contains("actuator1")) {
-                    if(message.toString().equals("1")) {
-                        btnPump.setChecked(true);
-                    }
-                    else
-                        btnPump.setChecked(false);
-                }
-                else if (topic.contains("actuator2")) {
-                    if(message.toString().equals("1")) {
-                        btnFan.setChecked(true);
-                    }
-                    else
-                        btnFan.setChecked(false);
-                }
-            }
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {}
+//        initially there is no data (even null data) so this will not get called
+        model.getFanOn().observe(this, fan_cond->{
+            btnFan.setChecked(fan_cond);
         });
+        model.getPumpOn().observe(this,pump_cond->{
+            btnPump.setChecked(pump_cond);
+        });
+        model.getTempData().observe(this, data->{
+            Log.d("APP","data is"+data.toString());
+            txtTemp.setText(data);
+        });
+        model.getHumidData().observe(this, data->{
+            txtHumi.setText(data);
+        });
+
     }
 
     @Override
@@ -104,22 +95,13 @@ public class SensorFragment extends Fragment {
         btnPump = view.findViewById(R.id.btnPUMP);
         btnFan = view.findViewById(R.id.btnFAN);
         btnPump.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                mqttHelper.publish("thaotran/feeds/actuator1", "1");
-            }
-            else {
-                mqttHelper.publish("thaotran/feeds/actuator1", "0");
-            }
+            model.setPumpOn(b);
         });
 
         btnFan.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                mqttHelper.publish("thaotran/feeds/actuator2", "1");
-            }
-            else {
-                mqttHelper.publish("thaotran/feeds/actuator2", "0");
-            }
+            model.setFanOn(b);
         });
+
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -128,6 +110,9 @@ public class SensorFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_sensor, container, false);
     }
 
-
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("Sensor","destroyed");
+    }
 }

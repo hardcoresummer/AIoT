@@ -22,6 +22,6 @@
         android:paddingTop="500dp"
         android:paddingBottom="5dp"
         android:layout_marginLeft="150dp"
-        android:text="Plan Status" />
+        android:text="Plant Status" />
 
 </FrameLayout>

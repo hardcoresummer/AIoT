@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.project.iotdashboard"
         minSdk 21
-        targetSdk 21
+        targetSdk 25
         versionCode 1
         versionName "1.0"
 
@@ -43,9 +43,12 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
     implementation 'commons-io:commons-io:2.4'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
 
     def nav_version = "2.5.3"
 

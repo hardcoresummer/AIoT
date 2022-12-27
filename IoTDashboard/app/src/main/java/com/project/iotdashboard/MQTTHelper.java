@@ -19,46 +19,22 @@ import java.nio.charset.Charset;
 
 
 public class MQTTHelper {
-    private MqttAndroidClient mqttAndroidClient;
-//    private static MQTTHelper mqttHelper = null;
+    public MqttAndroidClient mqttAndroidClient;
     private String[] arrayTopics = null;
 
     final String clientId = "12312122";
     final String serverUri = "tcp://io.adafruit.com:1883";
-    final String username = "username";
-    final String password = "password";
+    final String username = "thaotran";
+    final String password = "aio_ZOEQ65uQvLUtOpomVfUn4KSZooOx";
+
 
     public MQTTHelper(Context context,String[] topics) {
         arrayTopics = topics;
 //        MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
-        mqttAndroidClient.setCallback(new MqttCallbackExtended() {
-                        @Override
-            public void connectComplete(boolean b, String s) {
-                Log.w("mqtt", s);
-            }
-
-            @Override
-            public void connectionLost(Throwable throwable) {
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w("Mqtt", mqttMessage.toString());
-            }
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-            }
-        });
         connect();
     }
 
-//    public static MQTTHelper getInstance(Context context){
-//        if(mqttHelper == null){
-//            mqttHelper = new MQTTHelper(context);
-//        }
-//        return mqttHelper;
-//    }
 
     public void setCallback(MqttCallbackExtended callback) {
        mqttAndroidClient.setCallback(callback);
@@ -75,7 +51,7 @@ public class MQTTHelper {
              mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Log.d("MQTT","connect successfully?");
+                    Log.d("MQTT","connect successfully");
                     DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
                     disconnectedBufferOptions.setBufferEnabled(true);
                     disconnectedBufferOptions.setBufferSize(100);
@@ -89,13 +65,11 @@ public class MQTTHelper {
                     Log.e("MQTT", "Failed to connect to: " + serverUri + exception.toString());
                 }
             });
-            Log.d("MQTT", "status: "+String.valueOf(mqttAndroidClient.isConnected()));
 
         } catch (MqttException ex){
             Log.e("MQTT","error connecting?");
             ex.printStackTrace();
         }
-        Log.d("MQTT", "status: "+String.valueOf(mqttAndroidClient.isConnected()));
     }
 
     private void subscribeToTopic() {
@@ -105,11 +79,11 @@ public class MQTTHelper {
                 mqttAndroidClient.subscribe(arrayTopics[i], 0, null, new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
-                        Log.d("TEST", "Subscribed!");
+//                        Log.d("TEST", "Subscribed!");
                         try {
                             //  get the first message
                             mqttAndroidClient.publish(arrayTopics[finalI].concat("/get"),new MqttMessage());
-                            Log.d("MQTT",arrayTopics[finalI].concat("/get"));
+//                            Log.d("MQTT",arrayTopics[finalI].concat("/get"));
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }

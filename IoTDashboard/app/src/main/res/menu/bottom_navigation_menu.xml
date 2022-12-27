@@ -3,7 +3,7 @@
     <item
         android:id="@+id/menu_sensor"
         android:icon="@drawable/ic_sensor"
-        android:title="@string/sensor" />
+        android:title="Devices" />
     <item
         android:id="@+id/menu_plant_health"
         android:icon="@drawable/ic_grass"

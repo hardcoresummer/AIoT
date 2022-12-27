@@ -49,30 +49,20 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                String chosen_tag = null;
-                Fragment fragment = null;
+//                FragmentManager fragmentManager = getSupportFragmentManager();
+//                String chosen_tag = null;
+//                Fragment fragment = null;
                 NavDirections action = null;
+                if (item.getItemId() == bottomNavigationView.getSelectedItemId()) {return true;}
                 switch (item.getItemId()) {
                     case R.id.menu_sensor:
-//                        action = SensorFragmentDirections.actionSensorFragmentSelf();
-                        action = PlantHealthFragmentDirections.actionPlantHealthFragmentToSensorFragment();
-                        navController.navigate(action);
-//                        fragment = fragmentManager.findFragmentByTag(tag1);
-//                        if(fragment == null){
-//                            Log.i("frag","creating frag");
-//                            fragment = new SensorFragment();
-//                        }
-//                        chosen_tag = tag1;
+                            action = PlantHealthFragmentDirections.actionPlantHealthFragmentToSensorFragment();
+                            navController.navigate(action);
                         break;
                     case R.id.menu_plant_health:
+                        Log.d("MENU","switching");
                         action = SensorFragmentDirections.actionSensorFragmentToPlantHealthFragment();
                         navController.navigate(action);
-//                        fragment = fragmentManager.findFragmentByTag(tag2);
-//                        if(fragment == null){
-//                            fragment = new PlantHealthFragment();
-//                        }
-//                        chosen_tag = tag2;
                         break;
                 }
 //                getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, fragment,chosen_tag).commit();
