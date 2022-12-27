@@ -2,6 +2,7 @@ package com.project.iotdashboard;
 
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -38,7 +39,7 @@ public class SensorFragment extends Fragment {
 
 
     TextView txtTemp, txtHumi;
-    ToggleButton btnPump, btnFan;
+    SwitchCompat btnPump, btnFan;
     ShimmerFrameLayout container_temp ;
 
     ShimmerFrameLayout container_humid ;
@@ -120,9 +121,6 @@ public class SensorFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_sensor, container, false);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("Sensor","destroyed");
-    }
+
+
 }

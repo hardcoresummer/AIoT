@@ -1,2 +1,3 @@
-play_ground/**
 __pycache__/**
+.idea/**
+play_ground/**
